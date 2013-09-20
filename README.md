@@ -15,6 +15,6 @@ In a un*x environment you could add this function to your home .bash_profile
 
 And after that invoke
 
-  server .
+    server .
   
-To have an http server up and running
+To have an http server up and running on the current folder
