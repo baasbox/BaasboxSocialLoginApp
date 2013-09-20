@@ -1,0 +1,9 @@
+<div class="row">
+	<h1>your posts</h1> - <span><a href="#" ng-click="newPost()">create new</a></span>
+	
+	<div class="post" ng-repeat="p in posts">
+		<h2><a href="#" ng-click="editPost('{{p.id}}')">{{p.title}}</a></h2>
+		<p>{{p.content}}</p>
+	</div>
+
+</div>

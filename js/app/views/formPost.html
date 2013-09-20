@@ -1,0 +1,19 @@
+<form class="form-horizontal" novalidate  ng-submit="save()">
+	<div class="errors" ng-show="errors.length>0">
+		<ul>
+			<li ng-repeat="e in errors">{{e}}</li>
+		</ul>
+	</div>
+
+	<div class="control-group">
+		<label>Title:
+			<input type="text" ng-model="post.title" required/>
+		</label>
+	</div>
+	<div class="control-group">
+		<label>Content:
+			<textarea rows="14" cols="20" ng-model="post.content" required></textarea>
+		</label>
+	</div>
+	<input type="submit" class="btn btn-primary" value="submit"/>
+</form>

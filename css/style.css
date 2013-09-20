@@ -1,0 +1,24 @@
+body{
+	margin-top:10px;
+}
+
+.login-buttons {
+	margin-top:10px;
+}
+
+.content{
+	margin-top:95px;
+}
+input.ng-invalid.ng-dirty,
+ textarea.ng-invalid.ng-dirty {
+        background-color: #FA787E;
+      }
+    
+input.ng-valid.ng-dirty,
+textarea.ng-valid.ng-dirty {
+        background-color: #78FA89;
+      }
+
+div.errors{
+	color:red;
+}     
