@@ -38,11 +38,12 @@ If you open the app.js file inside the js/app folder you should see a section fo
     window.app.constant("googleAppId","<g+ app id>");
 
 where
-<your server url> is the entry you put into the /etc/hosts file i.e
+&lt;your server url&gt; is the entry you put into the /etc/hosts file i.e
+
     window.app.constant("serverUrl","http://<your server url>:9000");
 
-<fb app id> is the key that facebook gives you when creating an app
-<g+ app id> is the key that g+ gives you when creating an app
+&lt;fb app id&gt; is the key that facebook gives you when creating an app
+&lt;g+ app id&gt; is the key that g+ gives you when creating an app
 
 ##Windows users
 Coming soon...
