@@ -1,19 +1,24 @@
+
 <form class="form-horizontal" novalidate  ng-submit="save()">
+	<legend>Fill your note title and content</legend>
 	<div class="errors" ng-show="errors.length>0">
 		<ul>
 			<li ng-repeat="e in errors">{{e}}</li>
 		</ul>
 	</div>
 
-	<div class="control-group">
-		<label>Title:
-			<input type="text" ng-model="post.title" required/>
-		</label>
+	<div class="col-sm-6 col-sm-offset-3">
+	<div class="form-group">
+		<label for="title">Title:</label>
+		
+			<input id="title" type="text"  class="form-control" ng-model="post.title" required/>
+		
+		<label for="content">Content:</label>
+		
+			<textarea class="form-control" id="content" rows="10" ng-model="post.content" required></textarea>
+		</div>
+		<input type="submit" class="btn btn-primary" value="submit"/>
 	</div>
-	<div class="control-group">
-		<label>Content:
-			<textarea rows="14" cols="20" ng-model="post.content" required></textarea>
-		</label>
-	</div>
-	<input type="submit" class="btn btn-primary" value="submit"/>
+	
+	
 </form>

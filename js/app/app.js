@@ -1,29 +1,33 @@
 window.app = angular.module("Todo",['ngCookies','ngResource']);
 window.app.config(['$routeProvider','$locationProvider','$httpProvider', function($routeProvider,$locationProvider,$httpProvider) {
-  						$routeProvider.when('/',{templateUrl:'js/app/views/index.html'})
+  						$routeProvider.when('/',{templateUrl:'js/app/views/index.html',controller:'MainCtrl'})
   						$routeProvider.when('/posts',{templateUrl:'js/app/views/posts.html',controller:'PostsCtrl'})
   						$routeProvider.when('/posts/new',{templateUrl:'/js/app/views/formPost.html',controller:'NewPostCtrl'})
   						              .otherwise({redirectTo:'/'})
   					    $locationProvider.html5Mode(false).hashPrefix('!')
   					    $httpProvider.defaults.useXDomain = true;
   					    $httpProvider.defaults.headers.common["X-BAASBOX-APPCODE"] = '1234567890'
-
+  					    
   						          }]);
-						
-window.app.constant("baseUrl","http://omg.mfiandesio.com:9000\:9000");
+
+window.app.constant("serverUrl","http://omg.mfiandesio.com:9000");						
+window.app.constant("baseServerUrl","http://omg.mfiandesio.com:9000\:9000");
+window.app.constant("baseClientUrl","http://omg.mfiandesio.com:8000\:8000");
+window.app.constant("facebookAppId","169698819712195");
+window.app.constant("googleAppId","700672591072.apps.googleusercontent.com");
 
 
 
 
 
-window.app.run(function ($rootScope,baseUrl) {
+window.app.run(function ($rootScope,baseServerUrl,baseClientUrl,facebookAppId) {
     window.fbAsyncInit = function () {
         FB.init({
-           appId: '169698819712195',
-           channelUrl: 'http://omg.mfiandesio.com:8000/channel.html',
+           appId: facebookAppId,
+           channelUrl: baseClientUrl+'/channel.html',
            status     : false, // check login status
            cookie     : true, // enable cookies to allow the server to access the session
-           redirectUri: baseUrl+'/social/facebook/callback?appcode=1234567890',
+           redirectUri: baseServerUrl+'/social/facebook/callback?appcode=1234567890',
            xfbml:true
         });
         $rootScope.$broadcast("facebook_init");
@@ -59,91 +63,102 @@ window.app.run(function ($rootScope,baseUrl) {
     }(document));
 });
 
-window.app.factory('posts',['$resource','auth','baseUrl', function($resource,auth,baseUrl){
 
-        var Posts =  $resource(baseUrl+'/document/posts', {}, {
+
+window.app.factory('posts',['$resource','baseServerUrl', function($resource,baseUrl){
+		
+		return {getClient:function(auth){
+			var resource =  $resource(baseUrl+'/document/posts', {}, {
+                
                 query: {
                         method:'GET',
                         isArray:true,
-                        headers:{'Content-Type':'application/json; charset=UTF-8','X-BB-SESSION':auth.getUser().token},
+                        headers:{'X-BB-SESSION':auth.getToken()},
                         transformResponse: function (data, headersGetter) {
                         	var data =  JSON.parse(data)["data"];
                         	$(data).each(function(it){
                         		it.id = it["@rid"]
-                        			
-                        		
                         	});
                         	return data
                 		}
                 },
                 save: {
                 	method:'POST',
-                	headers:{'Content-Type':'application/json; charset=UTF-8','X-BB-SESSION':auth.getUser().token},
+                	headers:{'X-BB-SESSION':auth.getToken()}
                 	
             	}
             });
-                	
+         
+ 			return resource;
+		}}
+
+		
              
-        return Posts;
+        
 }]);
 
 window.app.factory('auth',['$cookieStore',function($cookieStore){
         var authObject = {};
-        authObject.user = null;
-        authObject.sso = null;
-        authObject.baasboxToken = null;
+        
+        
+
 
         authObject.isAuth = function (){
 
-        	    if (authObject.user == null) {
-                        authObject.user = $cookieStore.get('user');
-                }
-                return (authObject.user != null);
+        	return $cookieStore.get('user')!=null;
+                
+                
         };
+
+        authObject.clear = function(){
+        	
+        	$cookieStore.remove('user');
+        	
+        	
+        }
         authObject.setUser = function(newUser,social,baasboxToken) {
-                authObject.user = newUser;
-                if (authObject.user == null){ 
-                	$cookieStore.remove('user');
-                	
+                if(newUser==null){
+                	console.log("use clear method");
+                	return;
                 }
-                else {
-                	
-                	authObject.user.social = social;
-                	authObject.user.token = baasboxToken;
-                	console.log("setting user",authObject.user)
-                	$cookieStore.put('user', authObject.user)
-                	
-                };
+                var user = newUser;
+                console.log("setting user",user,"with social",social,"and token",baasboxToken)
+                user.social = social;
+                user.token = baasboxToken;
+                $cookieStore.put('user', user)
+               
         };
         authObject.getUser = function() {
         	if(authObject.isAuth()){
-                return authObject.user;
+                return $cookieStore.get('user')
             }
         };
-        authObject.getSso = function() {
-                return authObject.user.social;
+        authObject.getSocial = function() {
+        	
+            return authObject.getUser().social;
+            
+                
         };
-        authObject.getBaasboxToken = function() {
-                return authObject.user.baasboxToken;
+        authObject.getToken = function() {
+        	
+                return authObject.getUser().token;
+            
         };
+
         return authObject;
 }]);
 
-window.app.controller("MainCtrl",['$scope',function($scope,$location){
-
+window.app.controller("MainCtrl",['$scope','$location','auth',function($scope,$location,auth){
+	if(auth.isAuth()){
+		$location.path("/posts");
+	}
 }]);
 window.app.controller("PostsCtrl",['$scope','$http','auth','$location','posts',function($scope,$http,auth,$location,posts){
 	if(!auth.isAuth()){
 		$location.path("/")
 	}
 	
-	$scope.posts = 
-		posts.query({})
-
-	$scope.$watch($scope.posts,function(){
-		console.log("hello",$scope.posts);
-	})
-	
+	$scope.posts = posts.getClient(auth).query({})
 
 	$scope.newPost = function(){
 		$location.path("/posts/new")
@@ -171,21 +186,22 @@ window.app.controller("NewPostCtrl",['$scope','$http','auth','$location','posts'
 		if($scope.post.content==''){
 			$scope.errors.push('content can\'t be empty')
 		}
-		console.log($scope.errors)
 		if($scope.errors.length>0){
 			return;
 		}
-		posts.save($scope.post,function(d){
+		posts.getClient(auth).save($scope.post,function(d){
 			$location.path("/posts");
 		});
 	}
 }]);
 
-window.app.controller("HeaderCtrl",['$scope','auth','$location','$http',function($scope,auth,$location,$http){
+window.app.controller("HeaderCtrl",['$scope','auth','$location','$http','baseServerUrl','serverUrl','googleAppId',function($scope,auth,$location,$http,baseServerUrl,serverUrl,googleAppId){
 	$scope.$on("google_init",function(){
 		$scope.gapi = gapi;
+	})
 
-
+	$scope.$on("user_login",function(){
+		$location.path("/posts");
 	})
 
 	$scope.$on("facebook_init",function(){
@@ -193,20 +209,11 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http',function
 		$scope.$on("fb_statusChange",function(e,r) {
 			if (r.response.status === 'connected') {
       			var token = r.response.authResponse.accessToken;
-      			$.ajax("http://omg.mfiandesio.com:9000/social/loginWith/facebook?oauth_token="+token+"&oauth_secret="+token,{
-        			method:'POST',
-        			dataType:'json',
-        			success:function(data){
-        				auth.setUser(data["data"].user,{"sso":"facebook","auth_token":token,"auth_secret":token},data["data"]["X-BB-SESSION"]);
-          				$location.path('/posts')
-          				$scope.$apply()
-        			}
-        	});
-      
-    		} else if (r.response.status === 'not_authorized') {
-      			console.log(r.response)
+      			$scope.logincb(token,'facebook');	
+        	} else if (r.response.status === 'not_authorized') {
+      			
     		} else if(r.reponse === null) {
-      			console.log("logged out")
+      			
     		}
   		});
 	});
@@ -216,10 +223,13 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http',function
 	}
 
 	$scope.username = function(){
-		if($scope.loggedIn()){
-			return auth.getUser()["name"]
+			if(auth.isAuth()){
+			 return auth.getUser()["name"]
+			}else{
+				return "";
+			}
 		}
-	}
+	
 
 	$scope.twitterlogin = function(){
 
@@ -230,23 +240,38 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http',function
 			});
 	}
 
-	$scope.googlelogin = function(){
-		$scope.gapi.auth.authorize({"client_id":"700672591072.apps.googleusercontent.com","scope":["https://www.googleapis.com/auth/plus.login","https://www.googleapis.com/auth/plus.me","https://www.googleapis.com/auth/userinfo.email","https://www.googleapis.com/auth/userinfo.profile"]}, function(t){
-			var token = t["access_token"];
-			$.ajax("http://omg.mfiandesio.com:9000/social/loginWith/google?oauth_token="+token+"&oauth_secret="+token,{
-        			method:'POST',
-        			dataType:'json',
-        			success:function(data){
-        				auth.setUser(data["data"].user,{"sso":"google","auth_token":token,"auth_secret":token},data["data"]["X-BB-SESSION"]);
-          				$location.path('/posts')
-          				$scope.$apply()
-        			},
-        			error:function(data){
-        				console.log(data)
-        			}
-		})
-	})
+	$scope.logincb = function(t,social){
+		var token = t;
+			$scope.$apply(function(){
+			$http({
+				method:'POST',
+                url: serverUrl+"/social/loginWith/"+social+"?oauth_token="+token+"&oauth_secret="+token,
+                data:{},
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).success(function(data){
+            	auth.setUser(data["data"].user,{"sso":social,"auth_token":token,"auth_secret":token},data["data"]["X-BB-SESSION"]);
+          		
+          		$location.path("/posts")
+          				
+            }).error(function(data){
+            	console.log(data);
+            })
+		});
 	}
+
+	$scope.googlelogin = function(){
+		$scope.gapi.auth.authorize({"client_id":googleAppId,
+								    "scope":["https://www.googleapis.com/auth/plus.login",
+								    		 "https://www.googleapis.com/auth/plus.me","https://www.googleapis.com/auth/userinfo.email",
+								    		 "https://www.googleapis.com/auth/userinfo.profile"]}, 
+			function(t){
+				$scope.logincb(t["access_token"],'google');
+		})	
+		
+	}
+	
 
 	$scope.facebooklogin = function(){
 
@@ -258,19 +283,37 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http',function
 		
 	}
 	$scope.logout = function(){
+		
+		var token = auth.getToken();
+		if(token){
+		$http({
+                url: serverUrl+'/logout',
+                method: 'POST',
+                data:{},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-BB-SESSION':token}
+            }).success(function(){
+            	auth.clear();
+            	$location.path("/")
+            }).error(function(data){
+            	console.log(data);
+            });
+		}	
+		
 		try{
-			console.log(auth.getUser().social)
-			if(auth.getUser().social.sso=='facebook'){
+			var social = auth.getSocial(); 
+			if(social.sso=='facebook'){
 				$scope.fb.logout(function(response){
-					console.log("logout succesful")
+					console.log("facebook logged out")
 				});
 			}
 		}catch(e){
-			alert(e)
+			console.log(e)
 		}
-		auth.setUser(null);
-		$location.path("/")
-
+		
+		
+		
 	}
 	
 }]);

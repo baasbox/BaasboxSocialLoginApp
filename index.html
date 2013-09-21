@@ -19,15 +19,15 @@
                     <a class="navbar-brand" href="#">Baasbox Diary</a>
                   </div>
                   <div ng-show="loggedIn()">
-                    <a class="navbar-brand" href="#">Hello {{username}}</a>
+                    <a class="navbar-brand" href="#">Hello {{username()}}</a>
                   </div>
                 </div>
                 <div class="collapse navbar-collapse">
                   <div data-ng-show="loggedIn()"> 
                     <ul class="nav navbar-nav pull-right">
-                      <li><a ng-click="goTo('/posts')" href="#">Your posts</a></li>
+                      <li><a ng-click="goTo('/posts')" >Your posts</a></li>
                       
-                      <li><a ng-click="logout()" href="#">Logout</a></li>
+                      <li><a ng-click="logout()" >Logout</a></li>
                     </ul>
                   </div>
                   <div data-ng-show="!loggedIn()" class="btn-group pull-right login-buttons">
