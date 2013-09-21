@@ -43,6 +43,7 @@ where
     window.app.constant("serverUrl","http://<your server url>:9000");
 
 &lt;fb app id&gt; is the key that facebook gives you when creating an app
+
 &lt;g+ app id&gt; is the key that g+ gives you when creating an app
 
 ##Windows users
