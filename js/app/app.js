@@ -10,11 +10,11 @@ window.app.config(['$routeProvider','$locationProvider','$httpProvider', functio
   					    
   						          }]);
 
-window.app.constant("serverUrl","http://omg.mfiandesio.com:9000");						
-window.app.constant("baseServerUrl","http://omg.mfiandesio.com:9000\:9000");
-window.app.constant("baseClientUrl","http://omg.mfiandesio.com:8000\:8000");
-window.app.constant("facebookAppId","169698819712195");
-window.app.constant("googleAppId","700672591072.apps.googleusercontent.com");
+window.app.constant("serverUrl","http://<your server url>:9000");						
+window.app.constant("baseServerUrl","http://<your server url>:9000\:9000");
+window.app.constant("baseClientUrl","http://<your server url>:8000\:8000");
+window.app.constant("facebookAppId","<fb app id>");
+window.app.constant("googleAppId","<g+ app id>");
 
 
 
@@ -231,14 +231,7 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http','baseSer
 		}
 	
 
-	$scope.twitterlogin = function(){
-
-		$http.post("http://omg.mfiandesio.com:9000/social/login/twitter").
-			success(function(data){
-				var url = data["data"].url;
-				window.open(url)
-			});
-	}
+	
 
 	$scope.logincb = function(t,social){
 		var token = t;
