@@ -10,11 +10,11 @@ window.app.config(['$routeProvider','$locationProvider','$httpProvider', functio
   					    
   						          }]);
 
-window.app.constant("serverUrl","http://<your server url>:9000");						
-window.app.constant("baseServerUrl","http://<your server url>:9000\:9000");
-window.app.constant("baseClientUrl","http://<your server url>:8000\:8000");
-window.app.constant("facebookAppId","<fb app id>");
-window.app.constant("googleAppId","<g+ app id>");
+window.app.constant("serverUrl","http://<yourserverurl>:9000");						
+window.app.constant("baseServerUrl","http://<yourserverurl>:9000\:9000");
+window.app.constant("baseClientUrl","http://<yourserverurl>:8000\:8000");
+window.app.constant("facebookAppId","<facebookAppId>");
+window.app.constant("googleAppId","<googleAppId>");
 
 
 
@@ -290,7 +290,7 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http','baseSer
             	auth.clear();
             	$location.path("/")
             }).error(function(data){
-            	console.log(data);
+            	auth.clear();
             });
 		}	
 		
