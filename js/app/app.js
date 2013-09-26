@@ -1,3 +1,14 @@
+Array.prototype.remove= function(){
+    var what, a= arguments, L= a.length, ax;
+    while(L && this.length){
+        what= a[--L];
+        while((ax= this.indexOf(what))!= -1){
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+}
+
 window.app = angular.module("Todo",['ngCookies','ngResource']);
 window.app.config(['$routeProvider','$locationProvider','$httpProvider', function($routeProvider,$locationProvider,$httpProvider) {
   						$routeProvider.when('/',{templateUrl:'js/app/views/index.html',controller:'MainCtrl'})
@@ -29,7 +40,7 @@ window.app.run(function ($rootScope,baseServerUrl,baseClientUrl,facebookAppId) {
            channelUrl: baseClientUrl+'/channel.html',
            status     : false, // check login status
            cookie     : true, // enable cookies to allow the server to access the session
-           redirectUri: baseServerUrl+'/social/facebook/callback?appcode=1234567890',
+           redirectUri: baseServerUrl+'/social/login/facebook/callback?appcode=1234567890',
            xfbml:true
         });
         $rootScope.$broadcast("facebook_init");
@@ -103,8 +114,12 @@ window.app.factory('accounts',['$resource','baseServerUrl', function($resource,b
 		
 		return {
 			getClient:function(auth){
-			var resource =  $resource(baseUrl+'/social/accounts', {}, {
-                
+			var resource =  $resource(baseUrl+'/social/:sso', {sso:'@id'}, {
+                unlink: {
+                	method:'DELETE',
+                	isArray:false,
+                	headers:{'X-BB-SESSION':auth.getToken()}
+                },
                 query: {
                         method:'GET',
                         isArray:true,
@@ -228,18 +243,18 @@ window.app.controller("NewPostCtrl",['$scope','$http','auth','$location','posts'
 }]);
 
 window.app.controller("LinkAccountCtrl",['$scope','auth','baseServerUrl','availableSso','$rootScope','accounts',function($scope,auth,baseServerUrl,availableSso,$rootScope,accounts){
+	$scope.connected = [];
 	$scope.availables = accounts.getClient(auth).query({},function(d){
 		d.$then(function(i){
 			
 				var available = availableSso;
 				var connected = i.data;
-
+				
 				var names = [];
 				$(connected).each(function(i,n){
-					
 					names.push(n.from)
 				})
-				
+				$scope.connected = names;
 				var ret = [];
 
 
@@ -259,7 +274,15 @@ window.app.controller("LinkAccountCtrl",['$scope','auth','baseServerUrl','availa
 
 	$scope.linkAccount = function(sso){
 		$rootScope.$broadcast("social_link",sso);
-		$scope.available.push(sso);
+		
+	}
+	$scope.unlinkAccount = function(sso){
+		accounts.getClient(auth).unlink({sso:sso},function(data){
+			$scope.available.push(sso);
+			$scope.connected.remove(sso);
+
+		});
+		
 	}
 }]);
 
@@ -314,8 +337,8 @@ window.app.controller("HeaderCtrl",['$scope','auth','$location','$http','baseSer
 		}
 		$scope.$apply(function(){
 			$http({
-				method:'POST',
-                url: serverUrl+"/social/"+link+"/"+social+"?oauth_token="+token+"&oauth_secret="+token,
+				method: isLink?'PUT':'POST',
+                url: serverUrl+"/social/"+social+"?oauth_token="+token+"&oauth_secret="+token,
                 data:{},
                 headers: headers
             }).success(function(data){
