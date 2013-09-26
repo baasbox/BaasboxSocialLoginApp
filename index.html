@@ -19,7 +19,7 @@
                     <a class="navbar-brand" href="#">Baasbox Diary</a>
                   </div>
                   <div ng-show="loggedIn()">
-                    <a class="navbar-brand" href="#">Hello {{username()}}</a>
+                    <a class="navbar-brand" ng-click="linkAccount()" href="">Hello {{username()}}</a>
                   </div>
                 </div>
                 <div class="collapse navbar-collapse">
@@ -31,9 +31,9 @@
                     </ul>
                   </div>
                   <div data-ng-show="!loggedIn()" class="btn-group pull-right login-buttons">
-                      <button class="btn btn-facebook btn-sm" href="#" ng-click="facebooklogin()">
+                      <button class="btn btn-facebook btn-sm" href="#" ng-click="facebooklogin(false)">
                         <i class="icon-facebook"></i> | Login with facebook </button>
-                      <button href="#" ng-click="googlelogin()" class="btn btn-sm btn-google-plus"><i class="icon-google-plus"></i> | Login with google+</button>
+                      <button href="#" ng-click="googlelogin(false)" class="btn btn-sm btn-google-plus"><i class="icon-google-plus"></i> | Login with google+</button>
                   </div>
                 </div><!--/.nav-collapse -->
               </div>
