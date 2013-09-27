@@ -22,13 +22,13 @@ window.app.config(['$routeProvider','$locationProvider','$httpProvider', functio
   					    
   						          }]);
 
-window.app.constant("serverUrl","http://omg.mfiandesio.com:9000");						
-window.app.constant("baseServerUrl","http://omg.mfiandesio.com:9000\:9000");
-window.app.constant("baseClientUrl","http://omg.mfiandesio.com:8000\:8000");
-window.app.constant("facebookAppId","169698819712195");
-window.app.constant("googleAppId","965664053335.apps.googleusercontent.com");
+window.app.constant("serverUrl","<serverUrl>:9000");						
+window.app.constant("baseServerUrl","<serverUrl>:9000\:9000");
+window.app.constant("baseClientUrl","<serverUrl>:8000\:8000");
+window.app.constant("facebookAppId","<fbAppId>");
+window.app.constant("googleAppId","<googleAppId>");
 window.app.constant("baasboxAppCode","1234567890");
-window.app.constant("availableSso",['facebook','github','google']);
+window.app.constant("availableSso",['facebook','google']);
 
 
 
